@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import dns from 'dns';
 
 import User from './models/User.js';
 import Restaurant from './models/Restaurant.js';
@@ -17,6 +18,15 @@ const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/bitesom';
 
 const importData = async () => {
   try {
+    // Set custom DNS resolvers to resolve MongoDB SRV records reliably
+    if (connStr.startsWith('mongodb+srv://')) {
+      try {
+        dns.setServers(['8.8.8.8', '8.8.4.4']);
+      } catch (dnsErr) {
+        console.warn('Warning: Could not configure custom DNS servers:', dnsErr.message);
+      }
+    }
+
     await mongoose.connect(connStr);
 
     // Clear everything
